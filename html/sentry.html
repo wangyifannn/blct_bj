@@ -96,12 +96,12 @@
                 }
                 var screenHtml = "";
                 var classname = "";
-                screenHtml = '<li style="margin-top:0px;">'
-                    +'<span class="list1">' + res.carSn + '</span>'
-                    +'<span class="list2 ' + classname + '">' + res.driverName + '</span>'
-                    +'<span class="list3">' + res.licenseNo + '</span>'
-                    +'<span class="list5">' + res.updateTime + '</span>'
-                    +'<span class="list6">' + res.error + '</span></li>';
+                screenHtml = '<li style="margin-top:0px;">' +
+                    '<span class="list1">' + res.carSn + '</span>' +
+                    '<span class="list2 ' + classname + '">' + res.driverName + '</span>' +
+                    '<span class="list3">' + res.licenseNo + '</span>' +
+                    '<span class="list5">' + res.updateTime + '</span>' +
+                    '<span class="list6">' + res.error + '</span></li>';
                 $("#scrollDiv ul").html(screenHtml);
                 $("#scrollDiv .ifInfo").html(res.message);
             },

@@ -8,9 +8,14 @@ html {
     font-family: "微软雅黑";
 }
 
+.mytrackbtn {
+    cursor: pointer;
+    color: #3a4f72;
+}
+
 .button-group {
     top: 20px !important;
-    /*bott*/
+    right: 82px !important;
 }
 
 .wrap {
@@ -64,7 +69,10 @@ html {
     background: url("../img/map/clock_icon.png") no-repeat left center;
 }
 
+
 /*end 地图*/
+
+
 /*s 控件框开始*/
 
 .mapcontrol {
@@ -234,8 +242,13 @@ html {
     margin-top: 3px;
 }
 
+
 /*end 控件框结束*/
+
+
 /**/
+
+
 /*自定义信息窗口样式*/
 
 .info {
@@ -328,4 +341,155 @@ button.close_info {
     font-size: 16px;
     background: transparent;
     border: none;
+}
+
+
+/*  car_info*/
+
+.car-info {
+    box-sizing: border-box;
+    height: 0;
+    max-height: 481px;
+    width: 400px;
+    background-color: #fff;
+    position: absolute;
+    right: 20px;
+    top: 68px;
+    z-index: 333;
+    transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+    overflow: hidden;
+}
+
+.car-info.show {
+    height: 481px
+}
+
+.car-info-title {
+    color: #202d45;
+    height: 40px;
+    width: 100%;
+    line-height: 40px;
+    text-align: center;
+    background-color: #edf2f6;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.car-info table {
+    width: 100%;
+    text-align: center;
+    color: #202d45;
+}
+
+.car-info table th {
+    background-color: #edf2f6;
+    font-weight: normal;
+    font-size: 14px;
+}
+
+.car-info table th,
+.car-info table td {
+    border-right: 1px solid #e1e9ef;
+    border-bottom: 1px solid #e1e9ef;
+}
+
+.table-main {
+    box-sizing: border-box;
+    font-size: 13px;
+    border-left: 1px solid #e1e9ef;
+    border-top: 1px solid #e1e9ef;
+}
+
+.table-body {
+    max-height: 441px;
+    overflow-y: scroll;
+}
+
+.table-body::-webkit-scrollbar {
+    width: 0px;
+    background-color: #F5F5F5;
+}
+
+.table-head {
+    padding-right: 0px;
+}
+
+.table-noInfo {
+    height: 358px;
+    line-height: 358px;
+    text-align: center;
+    display: none;
+}
+
+.car-info-btn {
+    cursor: pointer;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 0;
+    height: 50px;
+    /* padding-left: 50px; */
+    border-radius: 25px;
+    padding-right: 50px;
+    overflow: hidden;
+    transition: all 0.7s cubic-bezier(0.075, 0.82, 0.165, 1);
+    z-index: 3333;
+}
+
+.car-info-btn.show {
+    width: 120px;
+}
+
+.car-info-btn-icon {
+    width: 50px;
+    height: 50px;
+    background: url(../img/map/info.png) no-repeat center;
+    background-size: 100%;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 333;
+}
+
+.car-info-btn-text {
+    font-size: 14px;
+    height: 40px;
+    line-height: 40px;
+    width: 120px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 20px;
+    background-color: #fff;
+    position: absolute;
+    left: 0;
+    top: 5px;
+    box-shadow: 0 2px 4px 0 #909090
+}
+
+.car-info-btn-text .icon {
+    display: block;
+    height: 100%;
+    width: 20px;
+    position: absolute;
+    top: 0;
+    left: 100px;
+    background: url(../img/map/ud.png) no-repeat center;
+}
+
+
+/* car_info */
+
+.loading {
+    width: 200px;
+    height: 200px;
+    display: block !important;
+    border: 1px solid red;
+    z-index: 10000;
+    top: -120px;
+    left: 0%;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 340px 45%;
+    position: absolute;
 }

@@ -208,8 +208,11 @@ function changeTabs() {
     }
 }
 
-$(window).on("hashchange", function() { // 兼容ie8+和手机端
-    if (window.location.hash != "") {
-        changeTabs();
-    }
-});
+// $(window).on("hashchange", function() { // 兼容ie8+和手机端
+//     if (window.location.hash != "") {
+//         changeTabs();
+//     }
+// });
+window.addEventListener('hashchange', function() {
+    changeTabs();
+}, false);

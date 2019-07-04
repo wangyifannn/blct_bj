@@ -1,0 +1,5 @@
+.flexbox.coreright_01.jingpinzhanshi {
+    width: 2900px;
+}.coreright_imglist {
+    width: 30%;
+}
