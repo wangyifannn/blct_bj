@@ -8,6 +8,11 @@
     <title>轨迹回放</title>
     <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css" />
     <link rel="stylesheet" href="../css/mapcontrol.css" />
+
+    <style>
+
+    </style>
+
 </head>
 
 <body>
@@ -64,7 +69,7 @@
     <!-- 底部表格 -->
     <div class="car-info" id="show">
         <!-- <div class="car-info-title">车辆上线统计</div> -->
-        <div class="table-main">
+        <div class="table-main" ontouchstart>
             <div class="table-head">
                 <table cellpadding="10" cellspacing="0">
                     <thead>
@@ -85,6 +90,12 @@
             <div class="table-noInfo">
                 <p>没有数据</p>
             </div>
+            <!-- <div class="pager">
+                <button class="button pre_page">上一页</button>
+                <button class="button next_page">下一页</button>
+            </div> -->
+            <!-- <div class="box" id="box"></div> -->
+
         </div>
     </div>
     <div class="car-info-btn" id="show_btn">
@@ -93,22 +104,20 @@
             <i class="icon"></i>
         </div>
     </div>
-    <div class="loading">
-        <img src="../img/index/loading.gif" alt="">
-    </div>
     <script language="javascript" src="http://webapi.amap.com/maps?v=1.4.7&key=ffc8503b4c8647c3753679c5e95278a5">
     </script>
     <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
     <script type="text/javascript" src="http://webapi.amap.com/demos/js/liteToolbar.js"></script>
-
     <script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+
     <script src="../js/zoom.js"></script>
 
     <script src="../assets/js/laydate.js"></script>
     <script src="../js/trackstyle.js"></script>
+
+    <!-- <script src="../assets/js/toPage.js"></script> -->
     <script>
         var allurl = window.allurl = "";
-
         var marker, lineArr = [];
         var newlineArr = [];
         var map = new AMap.Map("cmapcontainer", {
@@ -130,13 +139,13 @@
         });
 
         function getTrack(vSn) {
-            if (!vSn && $("#ago_input").val() == "") {
-                return;
-            }
             if (!!vSn) {
                 $("#ago_input").val(vSn);
             }
-            $(".loading").show(); // 当页面加载完成后将loading页隐藏
+            if ($("#ago_input").val() == "") {
+                return;
+            }
+            // $(".loading").show(); // 当页面加载完成后将loading页隐藏
             $.ajax({
                 url: "/car-management/car/carTrack.action",
                 // url: "../json/track.json",
@@ -146,7 +155,7 @@
                     "vSn": $("#ago_input").val()
                 },
                 success: function(res) {
-                    $(".loading").hide(); // 当页面加载完成后将loading页隐藏
+                    // $(".loading").hide(); // 当页面加载完成后将loading页隐藏
                     sessionStorage.removeItem("carMapInfo");
                     if (res.ret == false) {
                         alert(res.msg);
@@ -255,13 +264,12 @@
                     }, 5000)
 
                 },
-                error: function(res) {
-                    $(".loading").hide(); // 当页面加载完成后将loading页隐藏
-                }
+                error: function(res) {}
             })
         }
         $('#show_btn').on('mouseover', function() {
             $(this).addClass('show')
+
         });
         $('#show_btn').on('mouseout', function() {
             if (!$('#show').data('show')) {
@@ -286,22 +294,50 @@
             }
         });
         // 底部列表数据获取
+        var loading = false;
+        var page = 1;
+        $(".pre_page").click(function() {
+            if (loading == false) {
+                if (page > 1) {
+                    page--;
+                    getListData();
+                } else {
+                    return;
+                }
+            }
+        });
+        $(".next_page").click(function() {
+            if (loading == false) {
+                page++;
+                getListData();
+            }
+        });
         getListData()
 
+
         function getListData() {
+            loading = true;
             $.ajax({
-                url: allurl + "/car-management/gpscar/gpsOnline.action?page=1&size=10",
+                url: allurl + "/car-management/gpscar/gpsOnline.action",
                 type: "get",
                 dataType: "json",
                 success: function(res) {
+                    if ($('#show').data('show')) {
+                        $('#show').height(0)
+                        $('#show').removeClass('show');
+                        $('#show').data('show', false)
+                    }
+                    loading = false;
                     console.log(res)
                     if (res == null || (res != null && res.rows != null && res.rows.length == 0)) {
                         $('.table-noInfo').show().prev().hide()
-                        return
+                        return;
                     }
-                    $('.table-noInfo').hide().prev().show()
-                    updateListView(carFilter(res.rows))
-                        // updateListView(res.rows)
+                    $('.table-noInfo').hide().prev().show();
+                    updateListView(carFilter(res.rows));
+                },
+                error: function(res) {
+                    loading = false;
                 }
             })
         }
@@ -331,7 +367,6 @@
         }
 
         function updateListView(data) {
-            // data = sort(data)
             var html = '';
             data.forEach(item => {
                 html += '<tr>' +
@@ -339,7 +374,7 @@
                     '<td>' + item.vPlate + '</td>' +
                     '<td style="color:' + getColor(setStatus(item.lastTime)) + '">' + setStatus(item.lastTime) +
                     '</td>' +
-                    '<td class="mytrackbtn" vSn = "' + item.vSn + '"  vPlate="' + item.vPlate + '">查看轨迹</td>' +
+                    '<td class="mytrackbtn" vSn = "' + item.vSn + '"  vPlate="' + item.vPlate + '"  lastTime="' + item.lastTime + '" >查看轨迹</td>' +
                     '</tr>'
             });
             $('.table-body table tbody').html('').append(html)
@@ -350,21 +385,55 @@
                 $th.eq(i).attr('width', $(this).width())
             })
             var mytrackbtn = document.getElementsByClassName("mytrackbtn");
+
             for (var k = 0; k < mytrackbtn.length; k++) {
                 mytrackbtn[k].index = k;
                 mytrackbtn[k].onclick = function() {
                     console.log(this);
-                    console.log(this.getAttribute("vSn"));
-                    console.log(this.getAttribute("vPlate"));
-                    let vSn = this.getAttribute("vSn")
+                    let vSn = this.getAttribute("vSn");
+                    let lastTime = this.getAttribute("lastTime");
+                    let startTime = getPreMonth(lastTime);
+
+                    $("#startDate").val(startTime);
+                    $("#endDate").val(lastTime);
+
                     $(".guijibox").show();
                     $(".controlbox").hide();
                     $(".pointerTabLeft").addClass("pointerTabRight");
                     map.clearMap(); //清除图层覆盖物
                     lineArr.length = 0;
+                    // newlineArr.length = 0;
                     getTrack(vSn);
                 }
             }
+        }
+        // 获取当前日期前一个月的日期
+        // getPreMonth("2019-07-08 21:34:42")
+        // 返回："2019-06-08 21:34:42"
+        function getPreMonth(date) {
+            var arr = date.split('-');
+            var year = arr[0]; //获取当前日期的年份
+            var month = arr[1]; //获取当前日期的月份
+            var day = arr[2]; //获取当前日期的日
+            var days = new Date(year, month, 0);
+            days = days.getDate(); //获取当前日期中月的天数
+            var year2 = year;
+            var month2 = parseInt(month) - 1;
+            if (month2 == 0) {
+                year2 = parseInt(year2) - 1;
+                month2 = 12;
+            }
+            var day2 = day;
+            var days2 = new Date(year2, month2, 0);
+            days2 = days2.getDate();
+            if (day2 > days2) {
+                day2 = days2;
+            }
+            if (month2 < 10) {
+                month2 = '0' + month2;
+            }
+            var t2 = year2 + '-' + month2 + '-' + day2;
+            return t2;
         }
 
         function getColor(str) {
@@ -477,6 +546,11 @@
             }
         }
         $("#currenttrack_btn").click(function() {
+            if ($('#show').data('show')) {
+                $('#show').height(0)
+                $('#show').removeClass('show');
+                $('#show').data('show', false)
+            }
             map.clearMap(); //清除图层覆盖物
             searchcar();
         });

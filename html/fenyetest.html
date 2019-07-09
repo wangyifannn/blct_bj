@@ -8,7 +8,6 @@
     <title>轨迹回放</title>
     <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css" />
     <link rel="stylesheet" href="../css/mapcontrol.css" />
-    <!-- <link rel="stylesheet" href="../assets/css/toPage.css"> -->
 
     <style>
 
@@ -17,7 +16,7 @@
 </head>
 
 <body>
-    <div id="cmapcontainer"></div>
+    <!-- <div id="cmapcontainer" style="display:none"></div> -->
     <div class="mapcontrol">
         <div class="controlnav">
             <p>车辆管理系统 <img class="uparrow" src="../img/map/uparrow.png" alt=""></p>
@@ -69,7 +68,6 @@
     </div>
     <!-- 底部表格 -->
     <div class="car-info" id="show">
-        <!-- <div class="car-info-title">车辆上线统计</div> -->
         <div class="table-main" ontouchstart>
             <div class="table-head">
                 <table cellpadding="10" cellspacing="0">
@@ -91,12 +89,6 @@
             <div class="table-noInfo">
                 <p>没有数据</p>
             </div>
-            <!-- <div class="pager">
-                <button class="button pre_page">上一页</button>
-                <button class="button next_page">下一页</button>
-            </div> -->
-            <!-- <div class="box" id="box"></div> -->
-
         </div>
     </div>
     <div class="car-info-btn" id="show_btn">
@@ -105,12 +97,15 @@
             <i class="icon"></i>
         </div>
     </div>
-    <script language="javascript" src="http://webapi.amap.com/maps?v=1.4.7&key=ffc8503b4c8647c3753679c5e95278a5">
+    <!-- <script language="javascript" src="http://webapi.amap.com/maps?v=1.4.7&key=ffc8503b4c8647c3753679c5e95278a5">
+    </script> -->
+    <script src="http://webapi.amap.com/maps?v=1.4.6&key=ffc8503b4c8647c3753679c5e95278a5&plugin=AMap.MarkerClusterer">
     </script>
     <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
     <script type="text/javascript" src="http://webapi.amap.com/demos/js/liteToolbar.js"></script>
     <script type="text/javascript" src="../assets/js/jquery.min.js"></script>
 
+    <script src="http://a.amap.com/jsapi_demos/static/china.js"></script>
     <script src="../js/zoom.js"></script>
 
     <script src="../assets/js/laydate.js"></script>
@@ -123,8 +118,10 @@
         var newlineArr = [];
         var map = new AMap.Map("cmapcontainer", {
             resizeEnable: true,
-            center: [116.397428, 39.90923],
-            zoom: 9
+            // center: [116.397428, 39.90923],
+            // zoom: 9
+            center: [105, 34],
+            zoom: 5
         });
 
         // 创建一个 Icon
@@ -207,7 +204,7 @@
                         passedPolyline.setPath(e.passedPath);
                     })
                     map.setFitView();
-                    marker.moveAlong(lineArr, 1000); //1000表示加载速度
+                    marker.moveAlong(lineArr, 2000);
 
                     // 自定义加速前进事件  先调用暂停方法再调用继续方法
                     AMap.event.addDomListener(document.getElementById('fast'), 'click', function() {
@@ -215,6 +212,7 @@
 
                         newlineArr.splice(0, passArrlength);
                         marker.setMap(null);
+                        console.log(newlineArr[0].lng, newlineArr[0].lat);
                         marker = new AMap.Marker({
                             map: map,
                             position: [newlineArr[0].lng, newlineArr[0].lat],
@@ -249,7 +247,7 @@
                     }, false);
 
                     AMap.event.addDomListener(document.getElementById('start'), 'click', function() {
-                        marker.moveAlong(lineArr, 1000);
+                        marker.moveAlong(lineArr, 2000);
                     }, false);
                     AMap.event.addDomListener(document.getElementById('pause'), 'click', function() {
                         marker.pauseMove();
@@ -319,9 +317,26 @@
         function getListData() {
             loading = true;
             $.ajax({
-                url: allurl + "/car-management/gpscar/gpsOnline.action",
-                type: "get",
+                url: 'http://221.11.60.14:9014/syx/log/search/1/10',
+                // url: allurl + "/car-management/gpscar/gpsOnline.action",
+                type: "post",
+                // data: JSON.stringify({
+                //     "username": "chen",
+                //     "nickname": "alien"
+                // }),
+                // f485df03-83bf-4bdf-a672-8ea83f4a6532
                 dataType: "json",
+                data: {
+                    "page": 1,
+                    "size": 10
+                },
+                headers: {
+                    contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                    // 'Content-Type': 'multipart/form-data',
+                    // 'Content-Type': 'application/json',
+                    'origin': 'http://221.11.60.14:9014',
+                    'token': 'f485df03-83bf-4bdf-a672-8ea83f4a6532'
+                },
                 success: function(res) {
                     if ($('#show').data('show')) {
                         $('#show').height(0)
@@ -335,7 +350,8 @@
                         return;
                     }
                     $('.table-noInfo').hide().prev().show();
-                    updateListView(carFilter(res.rows));
+                    updateListView(res.rows);
+                    // updateListView(carFilter(res.rows));
                 },
                 error: function(res) {
                     loading = false;
@@ -368,7 +384,6 @@
         }
 
         function updateListView(data) {
-            // data = sort(data)
             var html = '';
             data.forEach(item => {
                 html += '<tr>' +
@@ -376,7 +391,7 @@
                     '<td>' + item.vPlate + '</td>' +
                     '<td style="color:' + getColor(setStatus(item.lastTime)) + '">' + setStatus(item.lastTime) +
                     '</td>' +
-                    '<td class="mytrackbtn" vSn = "' + item.vSn + '"  vPlate="' + item.vPlate + '"  lastTime="' + item.lastTime + '" >查看-></td>' +
+                    '<td class="mytrackbtn" vSn = "' + item.vSn + '"  vPlate="' + item.vPlate + '">查看-></td>' +
                     '</tr>'
             });
             $('.table-body table tbody').html('').append(html)
@@ -387,62 +402,22 @@
                 $th.eq(i).attr('width', $(this).width())
             })
             var mytrackbtn = document.getElementsByClassName("mytrackbtn");
-
             for (var k = 0; k < mytrackbtn.length; k++) {
                 mytrackbtn[k].index = k;
                 mytrackbtn[k].onclick = function() {
                     console.log(this);
-                    let vSn = this.getAttribute("vSn");
-                    let lastTime = this.getAttribute("lastTime");
-                    let startTime = getPreMonth(lastTime);
-
-                    $("#startDate").val(startTime);
-                    $("#endDate").val(lastTime);
-
+                    console.log(this.getAttribute("vSn"));
+                    console.log(this.getAttribute("vPlate"));
+                    let vSn = this.getAttribute("vSn")
                     $(".guijibox").show();
                     $(".controlbox").hide();
                     $(".pointerTabLeft").addClass("pointerTabRight");
                     map.clearMap(); //清除图层覆盖物
                     lineArr.length = 0;
-                    newlineArr.length = 0;
+                    // newlineArr.length = 0;
                     getTrack(vSn);
                 }
             }
-        }
-        // 获取当前日期前一个月的日期
-        // getPreMonth("2019-07-08 21:34:42")
-        // 返回："2019-06-08 21:34:42"
-        function getPreMonth(mydata) {
-            var date = new Date(mydata);
-            var year = date.getMonth() === 0 ? date.getFullYear() - 1 : date.getFullYear();
-            var seperator1 = "-";
-            var seperator2 = ":";
-            var month = date.getMonth() === 0 ? "12" : date.getMonth();
-            var strDate = date.getDate();
-            var strHours = date.getHours();
-            var strMinutes = date.getMinutes();
-            var strSeconds = date.getSeconds();
-
-            if (month >= 1 && month <= 9) {
-                month = "0" + month;
-            }
-            if (strDate >= 0 && strDate <= 9) {
-                strDate = "0" + strDate;
-            }
-            if (strHours >= 0 && strHours <= 9) {
-                strHours = "0" + strHours;
-            }
-            if (strMinutes >= 0 && strMinutes <= 9) {
-                strMinutes = "0" + strMinutes;
-            }
-            if (strSeconds >= 0 && strSeconds <= 9) {
-                strSeconds = "0" + strSeconds;
-            }
-
-            var currentdate = year + seperator1 + month + seperator1 + strDate +
-                " " + "00" + seperator2 + "00" +
-                seperator2 + "00";
-            return currentdate;
         }
 
         function getColor(str) {
@@ -478,14 +453,8 @@
                     var w = parseInt(x / 7)
                     str = w + '周前在线'
                 } else if (x < 365) {
-                    var m = new Date().getMonth() - new Date(timer).getMonth();
-                    if (m > 0) {
-                        str = m + '月前在线'
-                    } else {
-                        str = timer + ' 在线'
-                    }
-                } else {
-                    str = timer + " 在线"
+                    var m = new Date().getMonth() - new Date(timer).getMonth()
+                    str = m + '月前在线'
                 }
             }
             return str
@@ -572,7 +541,6 @@
         $("#track_playback_btn").click(function() {
             map.clearMap(); //清除图层覆盖物
             lineArr.length = 0;
-            newlineArr.length = 0;
             getTrack();
         });
         let carMapInfo = sessionStorage.getItem("carMapInfo");
@@ -582,7 +550,6 @@
             $(".pointerTabLeft").addClass("pointerTabRight");
             map.clearMap(); //清除图层覆盖物
             lineArr.length = 0;
-            newlineArr.length = 0;
             getTrack(carMapInfo);
         }
     </script>

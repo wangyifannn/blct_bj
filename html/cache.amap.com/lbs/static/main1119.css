@@ -19,6 +19,9 @@ html, body {
 	position: absolute;
 	bottom: 20px;
 	right: 82px;
+	color: #fff;
+	/* width: 300px; */
+	/* height: 100px; */
 	font-size: 12px;
 	padding: 10px;
 }

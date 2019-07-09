@@ -11,7 +11,8 @@
     </script>
     <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
     <script type="text/javascript" src="http://webapi.amap.com/demos/js/liteToolbar.js"></script>
-    <script type="text/javascript" src="../assets/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../assets/js/jquery.min.js"></script>
+
     <style type="text/css">
         body,
         html {
@@ -237,7 +238,7 @@
             box-sizing: border-box;
             height: 0;
             max-height: 481px;
-            width: 400px;
+            width: 335px;
             background-color: #fff;
             position: absolute;
             right: 20px;
@@ -540,9 +541,8 @@
                         <tr>
                             <th>车辆编号</th>
                             <th>车牌号</th>
-                            <th>驾驶员</th>
                             <th>GPS状态</th>
-                            <th>轨迹</th>
+                            <!-- <th>轨迹</th> -->
                         </tr>
                     </thead>
                 </table>
@@ -640,6 +640,8 @@
                     console.log(e)
                     var data = e.target.data;
                     window.sessionStorage.setItem('clickMapCar', data.vSn);
+                    window.sessionStorage.setItem('click', data.vSn);
+                    window.sessionStorage.setItem('clickMapCar', data.vSn);
                     var html = '<div class="infow">' +
                         '<div class="top">' +
                         '<div class="top-left">' +
@@ -675,9 +677,6 @@
                     '</div>'
                     infoWindow.setContent(html);
                     infoWindow.open(map, e.lnglat);
-                    // if (!$('#map_info').data('show')) {
-                    //   $('#map_info').addClass('show').data('show', true)
-                    // }
                     mapInfo(data)
                 })
 
@@ -750,8 +749,6 @@
             console.log(clickItem);
             let clickMapCar = !!clickItem ? clickItem : window.sessionStorage.getItem('clickMapCar');
             window.sessionStorage.setItem('carMapInfo', clickMapCar);
-            // window.location.hash = "carTrack";
-            // window.location.href = "/car-management/index.html#carTrack";
             window.open("/car-management/index.html#carTrack");
         }
         // 搜索
@@ -842,7 +839,7 @@
             getAllCar()
             timer = setInterval(function() {
                 getAllCar()
-            }, 10000)
+            }, 100000)
         }
 
 
@@ -868,16 +865,15 @@
         }
 
         function updateListView(data) {
-            // data = sort(data)
             var html = '';
             data.forEach(item => {
                 html += '<tr>' +
                     '<td>' + item.vSn + '</td>' +
                     '<td>' + item.vPlate + '</td>' +
-                    '<td>' + (item.driverName ? item.driverName : '-') + '</td>' +
+                    // '<td>' + (item.driverName ? item.driverName : '-') + '</td>' +
                     '<td style="color:' + getColor(setStatus(item.lastTime)) + '">' + setStatus(item.lastTime) +
                     '</td>' +
-                    '<td class="mytrackbtn" vSn = "' + item.vSn + '"  vPlate="' + item.vPlate + '">查看轨迹</td>' +
+                    // '<td class="mytrackbtn" vSn = "' + item.vSn + '"  vPlate="' + item.vPlate + '">查看-></td>' +
                     '</tr>'
             });
             $('.table-body table tbody').html('').append(html)

@@ -8,7 +8,6 @@
     <title>轨迹回放</title>
     <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css" />
     <link rel="stylesheet" href="../css/mapcontrol.css" />
-    <!-- <link rel="stylesheet" href="../assets/css/toPage.css"> -->
 
     <style>
 
@@ -61,6 +60,42 @@
 
         </div>
     </div>
+    <!-- 车辆信息 -->
+    <div class="mapinfo" id="map_info">
+        <div class="mapinfo_title">
+            <p>测试车辆详情</p>
+        </div>
+        <ul>
+            <li>
+                <span class="label">车辆编号</span>：
+                <span class="vSn"></span>
+            </li>
+            <li>
+                <span class="label">车牌号</span>：
+                <span class="licenseNo"></span>
+            </li>
+            <li>
+                <span class="label">ic卡卡号</span>：
+                <span class="iccard"></span>
+            </li>
+            <li>
+                <span class="label">gps编号</span>：
+                <span class="gpsSN"></span>
+            </li>
+            <li>
+                <span class="label">车型</span>：
+                <span class="vCarType"></span>
+            </li>
+            <li>
+                <span class="label">行驶速度</span>：
+                <span class="speed"></span>
+            </li>
+            <li>
+                <span class="label">驾驶员</span>：
+                <span class="driverName"></span>
+            </li>
+        </ul>
+    </div>
     <div class="button-group">
         <input type="button" class="button" value="开始" id="start" />
         <input type="button" class="button" value="暂停" id="pause" />
@@ -91,12 +126,6 @@
             <div class="table-noInfo">
                 <p>没有数据</p>
             </div>
-            <!-- <div class="pager">
-                <button class="button pre_page">上一页</button>
-                <button class="button next_page">下一页</button>
-            </div> -->
-            <!-- <div class="box" id="box"></div> -->
-
         </div>
     </div>
     <div class="car-info-btn" id="show_btn">
@@ -105,12 +134,15 @@
             <i class="icon"></i>
         </div>
     </div>
-    <script language="javascript" src="http://webapi.amap.com/maps?v=1.4.7&key=ffc8503b4c8647c3753679c5e95278a5">
+    <!-- <script language="javascript" src="http://webapi.amap.com/maps?v=1.4.7&key=ffc8503b4c8647c3753679c5e95278a5">
+    </script> -->
+    <script src="http://webapi.amap.com/maps?v=1.4.6&key=ffc8503b4c8647c3753679c5e95278a5&plugin=AMap.MarkerClusterer">
     </script>
     <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
     <script type="text/javascript" src="http://webapi.amap.com/demos/js/liteToolbar.js"></script>
     <script type="text/javascript" src="../assets/js/jquery.min.js"></script>
 
+    <script src="http://a.amap.com/jsapi_demos/static/china.js"></script>
     <script src="../js/zoom.js"></script>
 
     <script src="../assets/js/laydate.js"></script>
@@ -123,8 +155,10 @@
         var newlineArr = [];
         var map = new AMap.Map("cmapcontainer", {
             resizeEnable: true,
-            center: [116.397428, 39.90923],
-            zoom: 9
+            // center: [116.397428, 39.90923],
+            // zoom: 9
+            center: [105, 34],
+            zoom: 5
         });
 
         // 创建一个 Icon
@@ -207,7 +241,7 @@
                         passedPolyline.setPath(e.passedPath);
                     })
                     map.setFitView();
-                    marker.moveAlong(lineArr, 1000); //1000表示加载速度
+                    marker.moveAlong(lineArr, 2000);
 
                     // 自定义加速前进事件  先调用暂停方法再调用继续方法
                     AMap.event.addDomListener(document.getElementById('fast'), 'click', function() {
@@ -215,6 +249,7 @@
 
                         newlineArr.splice(0, passArrlength);
                         marker.setMap(null);
+                        console.log(newlineArr[0].lng, newlineArr[0].lat);
                         marker = new AMap.Marker({
                             map: map,
                             position: [newlineArr[0].lng, newlineArr[0].lat],
@@ -249,7 +284,7 @@
                     }, false);
 
                     AMap.event.addDomListener(document.getElementById('start'), 'click', function() {
-                        marker.moveAlong(lineArr, 1000);
+                        marker.moveAlong(lineArr, 2000);
                     }, false);
                     AMap.event.addDomListener(document.getElementById('pause'), 'click', function() {
                         marker.pauseMove();
@@ -368,7 +403,6 @@
         }
 
         function updateListView(data) {
-            // data = sort(data)
             var html = '';
             data.forEach(item => {
                 html += '<tr>' +
@@ -376,7 +410,7 @@
                     '<td>' + item.vPlate + '</td>' +
                     '<td style="color:' + getColor(setStatus(item.lastTime)) + '">' + setStatus(item.lastTime) +
                     '</td>' +
-                    '<td class="mytrackbtn" vSn = "' + item.vSn + '"  vPlate="' + item.vPlate + '"  lastTime="' + item.lastTime + '" >查看-></td>' +
+                    '<td class="mytrackbtn" vSn = "' + item.vSn + '"  vPlate="' + item.vPlate + '">查看-></td>' +
                     '</tr>'
             });
             $('.table-body table tbody').html('').append(html)
@@ -387,62 +421,22 @@
                 $th.eq(i).attr('width', $(this).width())
             })
             var mytrackbtn = document.getElementsByClassName("mytrackbtn");
-
             for (var k = 0; k < mytrackbtn.length; k++) {
                 mytrackbtn[k].index = k;
                 mytrackbtn[k].onclick = function() {
                     console.log(this);
-                    let vSn = this.getAttribute("vSn");
-                    let lastTime = this.getAttribute("lastTime");
-                    let startTime = getPreMonth(lastTime);
-
-                    $("#startDate").val(startTime);
-                    $("#endDate").val(lastTime);
-
+                    console.log(this.getAttribute("vSn"));
+                    console.log(this.getAttribute("vPlate"));
+                    let vSn = this.getAttribute("vSn")
                     $(".guijibox").show();
                     $(".controlbox").hide();
                     $(".pointerTabLeft").addClass("pointerTabRight");
                     map.clearMap(); //清除图层覆盖物
                     lineArr.length = 0;
-                    newlineArr.length = 0;
+                    // newlineArr.length = 0;
                     getTrack(vSn);
                 }
             }
-        }
-        // 获取当前日期前一个月的日期
-        // getPreMonth("2019-07-08 21:34:42")
-        // 返回："2019-06-08 21:34:42"
-        function getPreMonth(mydata) {
-            var date = new Date(mydata);
-            var year = date.getMonth() === 0 ? date.getFullYear() - 1 : date.getFullYear();
-            var seperator1 = "-";
-            var seperator2 = ":";
-            var month = date.getMonth() === 0 ? "12" : date.getMonth();
-            var strDate = date.getDate();
-            var strHours = date.getHours();
-            var strMinutes = date.getMinutes();
-            var strSeconds = date.getSeconds();
-
-            if (month >= 1 && month <= 9) {
-                month = "0" + month;
-            }
-            if (strDate >= 0 && strDate <= 9) {
-                strDate = "0" + strDate;
-            }
-            if (strHours >= 0 && strHours <= 9) {
-                strHours = "0" + strHours;
-            }
-            if (strMinutes >= 0 && strMinutes <= 9) {
-                strMinutes = "0" + strMinutes;
-            }
-            if (strSeconds >= 0 && strSeconds <= 9) {
-                strSeconds = "0" + strSeconds;
-            }
-
-            var currentdate = year + seperator1 + month + seperator1 + strDate +
-                " " + "00" + seperator2 + "00" +
-                seperator2 + "00";
-            return currentdate;
         }
 
         function getColor(str) {
@@ -478,14 +472,8 @@
                     var w = parseInt(x / 7)
                     str = w + '周前在线'
                 } else if (x < 365) {
-                    var m = new Date().getMonth() - new Date(timer).getMonth();
-                    if (m > 0) {
-                        str = m + '月前在线'
-                    } else {
-                        str = timer + ' 在线'
-                    }
-                } else {
-                    str = timer + " 在线"
+                    var m = new Date().getMonth() - new Date(timer).getMonth()
+                    str = m + '月前在线'
                 }
             }
             return str
@@ -572,7 +560,6 @@
         $("#track_playback_btn").click(function() {
             map.clearMap(); //清除图层覆盖物
             lineArr.length = 0;
-            newlineArr.length = 0;
             getTrack();
         });
         let carMapInfo = sessionStorage.getItem("carMapInfo");
@@ -582,8 +569,197 @@
             $(".pointerTabLeft").addClass("pointerTabRight");
             map.clearMap(); //清除图层覆盖物
             lineArr.length = 0;
-            newlineArr.length = 0;
             getTrack(carMapInfo);
+        }
+        // -------------------显示全部车辆--------------------------------------------------------------------------
+        var mapMarkers = [] // 添加到地图上的标记点
+            // 获取标记点位置
+        function getMarkers(res) {
+            markers = [];
+            if (res.length > 0) {
+                for (let i = 0; i < res.length; i++) {
+                    var lot = res[i].longitude
+                    var lat = res[i].latitude
+                    markers.push({
+                        position: [lot, lat],
+                        icon: startIcon,
+                        angle: res[i].towards,
+                        data: res[i]
+                    })
+                }
+            } else {
+                // alert("未查询到车辆相关数据，请核对车辆编号或车牌号。");
+                // return;
+            }
+            if (mapMarkers.length === 0 || mapMarkers.length != markers.length) {
+                addMarkers()
+            } else {
+                resetMarkers()
+            }
+        }
+        // 地图点击事件
+        var listener = AMap.event.addListener(map, "click", eventHandler);
+
+        function eventHandler(e) {
+            $('#show_btn').removeClass('show')
+            $('#show').height(0)
+            $('#show').removeClass('show');
+            $('#show').data('show', false)
+            $('#map_info').removeClass('show').data('show', false)
+            infoWindow.close()
+            clearInterval(timer)
+            getAllCar()
+            timer = setInterval(function() {
+                getAllCar()
+            }, 500000)
+        }
+
+
+        // 获取数据
+        function getAllCar() {
+            $.ajax({
+                url: allurl + "/car-management/car/allcar.action",
+                type: "get",
+                dataType: "json",
+                success: function(res) {
+                    if (res.ret == false) {
+                        alert(res.msg);
+                        return;
+                    }
+                    getMarkers(carFilter(res))
+                }
+            })
+        }
+        var timer = null;
+        getAllCar();
+
+        timer = setInterval(function() {
+            getAllCar()
+        }, 100000)
+
+        function mapInfo(info) {
+            for (const key in info) {
+                if (info.hasOwnProperty(key)) {
+                    const item = info[key];
+                    $('#map_info').find('.' + key).html(item ? item : '-')
+                }
+            }
+        }
+
+        function gotoTrack(clickItem) {
+            console.log(clickItem);
+            let clickMapCar = !!clickItem ? clickItem : window.sessionStorage.getItem('clickMapCar');
+            window.sessionStorage.setItem('carMapInfo', clickMapCar);
+            $(".guijibox").show();
+            $(".controlbox").hide();
+            $(".pointerTabLeft").addClass("pointerTabRight");
+            map.clearMap(); //清除图层覆盖物
+            lineArr.length = 0;
+            // newlineArr.length = 0;
+            getTrack(clickMapCar);
+            // window.open("/car-management/index.html#carTrack");
+        }
+        // 添加标记点
+        function addMarkers() {
+            if (markers.length === 0) {
+                return
+            }
+            mapMarkers = []
+            markers.forEach(function(marker) {
+                var mapMarker = new AMap.Marker({
+                    map: map,
+                    zIndex: 111,
+                    icon: marker.icon,
+                    position: [marker.position[0], marker.position[1]],
+                    offset: new AMap.Pixel(-15, -15),
+                    angle: marker.angle,
+                    autoRotation: true
+                });
+                // 添加标记点信息
+                mapMarker.data = marker.data
+
+                // 添加点击事件
+                mapMarker.on('click', function(e) {
+                    console.log(e)
+                    var data = e.target.data;
+                    window.sessionStorage.setItem('clickMapCar', data.vSn);
+                    var html = '<div class="infow">' +
+                        '<div class="top">' +
+                        '<div class="top-left">' +
+                        '<span class="speed">' + (data.speed ? data.speed : 0) + '</span>' +
+                        '<span class="unit">km/h</span>' +
+                        '</div>' +
+                        '<div class="line line-vertical"></div>' +
+                        '<div class="top-right">' +
+                        '<p><span class="vSn">' + data.vSn + '</span></p>' +
+                        '<p><span class="driverName">' + (data.driverName ? data.driverName :
+                            '无驾驶员信息') + '</span></p>' +
+                        '<p><span class="licenseNo">' + data.licenseNo + '</span></p>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="line line-horizontal"></div>' +
+                        '<div class="bottom">' +
+                        '<p>' +
+                        '<span class="label">车&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;型：</span>' +
+                        '<span class="vCarType">' + (data.vCarType ? data.vCarType : '无') + '</span>' +
+                        '</p>' +
+                        '<p>' +
+                        '<span class="label">IC卡卡号：</span>' +
+                        '<span class="iccard">' + (data.iccard ? data.iccard : '无') + '</span>' +
+                        '</p>' +
+                        '<p>' +
+                        '<span class="label">GPS编号：</span>' +
+                        '<span class="gpsSN">' + data.gpsSN + '</span>' +
+                        '</p>' +
+                        '<p>' +
+                        '<span id="gotoTrack" onclick="gotoTrack()">近一个月轨迹-></span>'
+                    '</p>' +
+                    '</div>' +
+                    '</div>'
+                    infoWindow.setContent(html);
+                    infoWindow.open(map, e.lnglat);
+                    mapInfo(data)
+                })
+
+                mapMarkers.push(mapMarker)
+
+                infoWindow = new AMap.InfoWindow({
+                    isCustom: false, //使用自定义窗体
+                    draggable: false, //是否可拖动  
+                    offset: new AMap.Pixel(0, -11),
+                    content: ""
+                });
+            })
+
+            map.setFitView()
+            addCluster()
+        }
+
+        // 更新标记点位置
+        function resetMarkers() {
+            mapMarkers.forEach((mapMarker, i) => {
+                mapMarker.data = markers[i].data
+                mapMarker.setPosition(markers[i].position)
+                mapMarker.setAngle(markers[i].angle)
+            });
+        }
+
+        // 删除标记点
+        function clearMarkers() {
+            map.clearMap()
+            map.remove(mapMarkers)
+            mapMarkers.forEach(function(mapMarker) {
+                cluster.removeMarker(mapMarker)
+            });
+            mapMarkers = []
+            markers = []
+        }
+        // 添加聚合
+        function addCluster() {
+            cluster = new AMap.MarkerClusterer(map, mapMarkers, {
+                gridSize: 30,
+                maxZoom: 16
+            });
         }
     </script>
 </body>

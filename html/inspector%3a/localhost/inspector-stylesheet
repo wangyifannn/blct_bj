@@ -1,5 +1,10 @@
-.flexbox.coreright_01.jingpinzhanshi {
-    width: 2900px;
-}.coreright_imglist {
-    width: 30%;
+.el-upload__text {
+    margin-bottom: 20px\;
+}img.cursorpointer {
+    width: 100%;
+}
+
+.avatar-uploader {
+    margin-bottom: 20px;
+    text-align: left;
 }
