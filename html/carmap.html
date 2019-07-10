@@ -238,7 +238,7 @@
             box-sizing: border-box;
             height: 0;
             max-height: 481px;
-            width: 335px;
+            width: 350px;
             background-color: #fff;
             position: absolute;
             right: 20px;
@@ -920,8 +920,14 @@
                     var w = parseInt(x / 7)
                     str = w + '周前在线'
                 } else if (x < 365) {
-                    var m = new Date().getMonth() - new Date(timer).getMonth()
-                    str = m + '月前在线'
+                    var m = new Date().getMonth() - new Date(timer).getMonth();
+                    if (m > 0) {
+                        str = m + '月前在线'
+                    } else {
+                        str = timer.split(" ")[0] + '在线'
+                    }
+                } else {
+                    str = timer.split(" ")[0] + '在线'
                 }
             }
             return str
